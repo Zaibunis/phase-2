@@ -1,55 +1,109 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Todo Full-Stack Web Application Constitution
+<!--
+Sync Impact Report
+- Version change: template → 1.0.0
+- Modified principles: filled template placeholders with project-specific principles
+- Added sections: none (template sections filled and expanded)
+- Removed sections: none
+- Templates requiring updates:
+  - ✅ updated: .specify/templates/plan-template.md
+  - ✅ updated: .specify/templates/spec-template.md
+  - ✅ reviewed (no change): .specify/templates/tasks-template.md
+  - ✅ reviewed (no change): .claude/commands/sp.constitution.md
+- Follow-up TODOs:
+  - None
+-->
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### Spec-driven development
+- No implementation work may begin without an explicit, written specification.
+- Every feature MUST follow the workflow: spec → plan → tasks → implement.
+- Specs MUST define acceptance scenarios and error/edge cases that are sufficient for
+  autonomous agent execution.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### Security by default (auth + user isolation)
+- Every user-facing action MUST be authenticated and authorized.
+- All backend API endpoints MUST require a valid JWT and return `401 Unauthorized` when
+  missing/invalid.
+- Authenticated user identity MUST be derived from the JWT only.
+- All task data access MUST be scoped to the authenticated user; cross-user access is
+  forbidden.
+- Token expiration MUST be respected.
+- Secrets/tokens MUST NOT be hardcoded; configuration MUST use environment variables.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### Deterministic behavior
+- The system MUST be stateless on the backend; requests are fully determined by
+  `(request body, headers, authenticated user, database state)`.
+- The same inputs MUST produce the same outputs (including ordering) unless persisted
+  state has changed.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### Separation of concerns
+- Frontend (Next.js) and backend (FastAPI) responsibilities MUST remain distinct.
+- Authentication is handled by Better Auth on the frontend; the backend verifies JWTs
+  and enforces authorization.
+- Database access MUST be encapsulated through SQLModel/SQLAlchemy patterns (no raw,
+  ad-hoc access paths that bypass authorization constraints).
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### Agentic implementation (no manual coding)
+- Changes are executed through Claude Code workflows and reviewed iteratively.
+- Significant work MUST be routed through the appropriate specialized agent:
+  - Auth: `auth-flow-engineer`
+  - Backend: `fastapi-backend-engineer`
+  - DB: `neon-db-architect`
+  - Frontend: `nextjs-ui-builder`
+- A Prompt History Record (PHR) MUST be created for every user prompt.
 
-### [PRINCIPLE_6_NAME]
+### Authoritative stack + explicit contracts
+- The authoritative stack is:
+  - Frontend: Next.js 16+ (App Router)
+  - Backend: Python FastAPI
+  - ORM: SQLModel
+  - Database: Neon Serverless PostgreSQL
+  - Authentication: Better Auth (JWT issuance supported)
+- System communication MUST be RESTful JSON.
+- REST conventions MUST be followed consistently, including correct HTTP status codes.
+- API behavior MUST be explicit, testable, and unambiguous.
 
+## Constraints
 
-[PRINCIPLE__DESCRIPTION]
+- Frontend: Next.js 16+ with App Router
+- Backend: FastAPI (Python) with SQLModel
+- Database: Neon Serverless PostgreSQL
+- Authentication: Better Auth with JWT
+- Backend authorization:
+  - Frontend calls FastAPI with `Authorization: Bearer <token>`
+  - Backend verifies JWT signature with shared secret (`BETTER_AUTH_SECRET`)
+  - Backend scopes all data to the authenticated user
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Non-goals:
+- Do not implement detection evasion, destructive payloads, or unauthorized security
+  testing.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Development Workflow & Quality Gates
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Workflow MUST be: spec → plan → tasks → implement.
+- Plans and tasks MUST include clear, testable acceptance criteria.
+- Minimal diffs: avoid unrelated refactors.
+- Quality gates (must hold for every change):
+  - All API endpoints are authenticated and enforce ownership checks.
+  - Backend remains stateless.
+  - Frontend is responsive and auth-aware.
+  - Database integrity is preserved (constraints/relationships are correct).
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- This constitution supersedes other practices.
+- Amendments MUST:
+  - be documented in this file,
+  - include the rationale and the implications,
+  - include a migration plan if they change existing rules.
+- Semantic versioning policy for this constitution:
+  - MAJOR: backward-incompatible rule removals/redefinitions
+  - MINOR: new principle/section added or materially expanded
+  - PATCH: clarifications and non-semantic refinements
+- Compliance expectations:
+  - Reviews MUST verify authentication, authorization, and user isolation.
+  - Work products MUST be traceable (spec/plan/tasks and PHR entries).
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-01-09 | **Last Amended**: 2026-01-09

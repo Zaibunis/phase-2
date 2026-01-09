@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: Authentication API
+  version: 1.0.0
+  description: |
+    OpenAPI contract for authentication operations.
+
+    Authentication:
+    - All protected endpoints require `Authorization: Bearer <token>`.
+    - The backend verifies the JWT signature and extracts user identity.
+    - Invalid/missing tokens return 401 Unauthorized.
+
+servers:
+  - url: http://localhost:8000
+
+tags:
+  - name: auth
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      description: Basic health check endpoint.
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Register user
+      description: Register a new user account with Better Auth.
+      responses:
+        "200":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: User identifier
+                      email:
+                        type: string
+                        description: User email
+                  tokens:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        description: JWT access token
+                      refresh_token:
+                        type: string
+                        description: JWT refresh token
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Login user
+      description: Authenticate user and issue JWT tokens.
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: User identifier
+                      email:
+                        type: string
+                        description: User email
+                  tokens:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        description: JWT access token
+                      refresh_token:
+                        type: string
+                        description: JWT refresh token
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Logout user
+      description: Invalidate user session (client-side cleanup).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged out successfully"
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "unauthorized"
+                  message:
+                    type: string
+                    example: "Missing or invalid token"

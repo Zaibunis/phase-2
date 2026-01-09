@@ -31,7 +31,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Spec exists and includes acceptance scenarios + edge cases sufficient for
+      autonomous execution.
+- [ ] All user-facing actions are authenticated; backend endpoints require JWT and
+      return 401 on missing/invalid token.
+- [ ] Data access is scoped to the authenticated user; cross-user access is prevented.
+- [ ] Stack constraints honored (Next.js App Router, FastAPI, SQLModel, Neon, Better
+      Auth JWT with `Authorization: Bearer <token>`).
+- [ ] Backend remains stateless; REST conventions + status codes are explicit.
+- [ ] Work will be executed via Claude Code workflows (no manual coding) and a PHR will
+      be recorded for this prompt.
 
 ## Project Structure
 

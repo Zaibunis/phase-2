@@ -1,3 +1,38 @@
+---
+id: 0004
+title: "Implement foundational DB layer"
+stage: green
+date: 2026-01-09
+surface: agent
+model: claude-sonnet-4-5-20250929
+feature: 001-backend-api-data
+branch: 001-backend-api-data
+user: unknown
+command: database-skill
+labels: ["database","sqlmodel","neon","session","models"]
+links:
+  spec: null
+  ticket: null
+  adr: null
+  pr: null
+files:
+  - backend/src/db/session.py
+  - backend/src/db/models.py
+  - specs/001-backend-api-data/tasks.md
+tests:
+  - python -m compileall backend/src
+---
+
+## Prompt
+
+```text
+<system-reminder>
+As you answer the user's questions, you can use the following context:
+# claudeMd
+Codebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.
+
+Contents of D:\Documents\hackathon-4\phase-2\CLAUDE.md (project instructions, checked into the codebase):
+
 # Claude Code Rules
 
 This file is generated during init for the selected agent.
@@ -90,7 +125,7 @@ After completing requests, you **MUST** create a PHR (Prompt History Record).
 - Spec/task/plan creation
 - Multi-step workflows
 
-**PHR Creation Process:**
+PHR Creation Process:
 
 1) Detect stage
    - One of: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
@@ -152,8 +187,8 @@ After completing requests, you **MUST** create a PHR (Prompt History Record).
 
 ### 4. Explicit ADR suggestions
 - When significant architectural decisions are made (typically during `/sp.plan` and sometimes `/sp.tasks`), run the three‑part test and suggest documenting with:
-  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
-- Wait for user consent; never auto‑create the ADR.
+  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>}`"
+- Wait for user consent; never auto-create the ADR.
 
 ### 5. Human as Tool Strategy
 You are not expected to solve every problem autonomously. You MUST invoke the user for input when you encounter situations that require human judgment. Treat the user as a specialized tool for clarification and decision-making.
@@ -162,7 +197,7 @@ You are not expected to solve every problem autonomously. You MUST invoke the us
 1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
 2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
 3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
+4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps.
 
 ## Default policies (must follow)
 - Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
@@ -258,10 +293,43 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
 
-## Recent Changes
-- 001-auth-security-integration: Added Python 3.11, JavaScript/TypeScript (Next.js 16+) + Better Auth, FastAPI, PyJWT, Next.js App Router, SQLModel
-- 001-backend-api-data: Added Python 3.11+ + FastAPI, SQLModel (SQLAlchemy), PyJWT (or equivalent JWT verifier)
-- 001-backend-api-data: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-## Active Technologies
-- Python 3.11, JavaScript/TypeScript (Next.js 16+) + Better Auth, FastAPI, PyJWT, Next.js App Router, SQLModel (001-auth-security-integration)
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.
+</system-reminder>
+Implement foundational database layer for feature 001-backend-api-data per specs/001-backend-api-data/plan.md and tasks.md tasks T006 and T007.
+
+Create these files:
+- backend/src/db/session.py: SQLModel/SQLAlchemy engine + session factory using DATABASE_URL from backend/src/core/config.py
+- backend/src/db/models.py: SQLModel models for User and Task with fields per specs/001-backend-api-data/data-model.md and constraints (Task.user_id required). Include created_at/updated_at timestamps.
+
+Constraints:
+- Use SQLModel.
+- No hardcoded secrets.
+- Keep it minimal.
+- Do not implement endpoints yet.
+
+Also update specs/001-backend-api-data/tasks.md marking T006 and T007 complete once code exists.
+
+Run no destructive commands; do not commit.Return a concise summary of what you changed (files + key decisions). If you created/edited files, list exact paths. If nothing was written due to any issue, say so and why.
+```
+
+## Response snapshot
+
+- Added a minimal SQLModel engine/session factory that reads `DATABASE_URL` via `backend/src/core/config.py`.
+- Added SQLModel tables for `users` and `tasks`, enforcing required `Task.user_id`, non-empty title, and timestamps.
+- Marked tasks T006 and T007 complete in the feature task checklist.
+
+## Outcome
+
+- ✅ Impact: Backend now has a minimal, testable DB foundation for later API work.
+- 🧪 Tests: Syntax check via `python -m compileall backend/src`.
+- 📁 Files: Created `backend/src/db/session.py`, `backend/src/db/models.py`; updated `specs/001-backend-api-data/tasks.md`.
+- 🔁 Next prompts: Implement T008–T012 (JWT verification, FastAPI app wiring, deps).
+- 🧠 Reflection: Keep DB layer minimal; avoid endpoint coupling.
+
+## Evaluation notes (flywheel)
+
+- Failure modes observed: None.
+- Graders run and results (PASS/FAIL): Not run.
+- Prompt variant (if applicable): null
+- Next experiment (smallest change to try): Add an alembic migration scaffold when migrations are introduced.
