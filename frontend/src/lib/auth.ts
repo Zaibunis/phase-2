@@ -110,7 +110,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Helper function to sign out
 export const signOut = async (): Promise<void> => {
   try {
-    await auth.signOut();
+    await auth.client.signOut();
   } catch (error) {
     console.error("Error signing out:", error);
     throw error;
