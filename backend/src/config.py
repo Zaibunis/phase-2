@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     refresh_token_cookie_name: str = "refresh_token"
     csrf_token_header_name: str = "x-csrf-token"
     csrf_secret: str = ""
+    better_auth_secret: str = ""
 
     # Rate Limiting
     rate_limit_requests: int = 100

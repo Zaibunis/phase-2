@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { getAccessToken } from './auth';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { getAccessToken } from '../lib/auth';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -15,10 +15,10 @@ class ApiClient {
 
     // Request interceptor to add JWT token
     this.client.interceptors.request.use(
-      async (config: AxiosRequestConfig) => {
+      async (config: InternalAxiosRequestConfig) => {
         const token = await getAccessToken();
         if (token) {
-          config.headers!.Authorization = `Bearer ${token}`;
+          config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
@@ -108,6 +108,8 @@ class ApiClient {
   }
 }
 
+
+
 // Configuration interface
 export interface ApiConfig {
   baseUrl: string;
@@ -118,7 +120,7 @@ export interface ApiConfig {
 
 // Default configuration
 const defaultConfig: ApiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api',
+  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
   timeout: 10000, // 10 seconds
   maxRetries: 3,
   retryDelay: 1000, // 1 second

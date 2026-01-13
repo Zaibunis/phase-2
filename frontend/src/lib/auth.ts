@@ -3,23 +3,14 @@
  * Handles user authentication, JWT token management, and API integration.
  */
 
-import { createAuth, createAuthEndpoint } from "@better-auth/react";
 import { betterAuth } from "better-auth";
+import { createAuthClient } from "better-auth/client";
 
-// Initialize Better Auth client with JWT plugin
+// Initialize Better Auth client for frontend - No database configuration needed
 export const auth = betterAuth({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000",
   secret: process.env.BETTER_AUTH_SECRET || "your-super-secret-jwt-key-change-in-production",
-  database: {
-    provider: "sqlite",
-    url: process.env.DATABASE_URL || "./sqlite.db",
-  },
-  // Enable JWT plugin for token-based authentication
-  jwt: {
-    secret: process.env.BETTER_AUTH_SECRET || "your-super-secret-jwt-key-change-in-production",
-    expiresIn: "15m", // 15 minutes for access tokens
-    refreshExpiresIn: "7d", // 7 days for refresh tokens
-  },
+  // Frontend doesn't need database configuration - this is handled by the backend
   // Email and password authentication
   emailAndPassword: {
     enabled: true,
@@ -30,55 +21,34 @@ export const auth = betterAuth({
   // Session configuration
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
-    slidingExpiration: true,
     updateAge: 60 * 60 * 24, // Update session every 24 hours if active
   },
   // User configuration
   user: {
-    include: {
-      // Any additional fields to include in user object
+    fields: {
+      // Map any additional fields if needed
     },
   },
-  // Advanced configurations
-  advanced: {
-    generateUserId: () => crypto.randomUUID(), // Use UUID for user IDs
-    prefix: "/api/auth", // API prefix for auth endpoints
-  },
   // Hooks for custom logic
-  hooks: {
-    afterUserSignIn: [
-      async (ctx) => {
-        // Custom logic after sign in
-        console.log("User signed in:", ctx.user.email);
-      }
-    ],
-    afterUserSignUp: [
-      async (ctx) => {
-        // Custom logic after sign up
-        console.log("New user registered:", ctx.user.email);
-      }
-    ]
-  }
+  hooks: {}
 });
 
-// Create React hooks for authentication
-export const {
-  useSession,
-  useSignOut,
-  useSignIn,
-  useSignUp
-} = createAuth({
-  auth,
+// Create authentication client
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000",
   plugins: [
     // Add any additional plugins here
   ]
 });
 
+// Export BetterAuth hooks
+export const { useSession, useSignIn, useSignUp, useSignOut } = authClient;
+
 // Helper function to get the access token
 export const getAccessToken = async (): Promise<string | null> => {
   try {
-    const session = await auth.getSession();
-    return session?.accessToken || null;
+    const session = await auth.api.getSession();
+    return session?.session?.token || null;
   } catch (error) {
     console.error("Error getting access token:", error);
     return null;
@@ -88,8 +58,8 @@ export const getAccessToken = async (): Promise<string | null> => {
 // Helper function to get the refresh token
 export const getRefreshToken = async (): Promise<string | null> => {
   try {
-    const session = await auth.getSession();
-    return session?.refreshToken || null;
+    const session = await auth.api.getSession();
+    return session?.session?.token || null;
   } catch (error) {
     console.error("Error getting refresh token:", error);
     return null;
@@ -99,8 +69,8 @@ export const getRefreshToken = async (): Promise<string | null> => {
 // Helper function to check if user is authenticated
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    const session = await auth.getSession();
-    return !!session;
+    const session = await auth.api.getSession();
+    return !!session?.session;
   } catch (error) {
     console.error("Error checking authentication status:", error);
     return false;
@@ -110,7 +80,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Helper function to sign out
 export const signOut = async (): Promise<void> => {
   try {
-    await auth.client.signOut();
+    await auth.api.signOut();
   } catch (error) {
     console.error("Error signing out:", error);
     throw error;

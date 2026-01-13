@@ -7,10 +7,19 @@ from src.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Create SQLModel engine
+# Create SQLModel engine with proper SSL settings for Neon
+connect_args = {
+    "connect_timeout": 10,
+}
+
 engine = create_engine(
     settings.database_url,
     echo=settings.debug,
+    pool_pre_ping=True,  # Verify connections before use
+    pool_recycle=300,  # Recycle connections every 5 minutes
+    pool_size=5,
+    max_overflow=10,
+    connect_args=connect_args,
 )
 
 

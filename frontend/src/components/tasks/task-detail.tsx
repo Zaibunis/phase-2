@@ -147,3 +147,5 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, onEdit, onDelete, 
     </div>
   );
 };
+
+export type { Task };
