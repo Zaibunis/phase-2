@@ -140,7 +140,7 @@ export default function LandingPage() {
 
         {/* Footer */}
         <footer className="py-8 text-center text-sm text-gray-600 border-t border-gray-200">
-          <p>&copy; 2026 Todo App. Built with Next.js, FastAPI, and PostgreSQL.</p>
+          <p>&copy; 2026 Todo App. Built with Next.js, FastAPI, and Neon Database.</p>
         </footer>
       </div>
     </div>
