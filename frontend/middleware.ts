@@ -1,35 +1,35 @@
-// T022: Middleware for route protection
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+const publicRoutes = ["/", "/signin", "/signup"];
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('auth_token')?.value ||
-                request.headers.get('authorization')?.replace('Bearer ', '');
+  const { pathname } = request.nextUrl;
 
-  // Check if trying to access protected routes
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/tasks');
-
-  // If protected route and no token, redirect to signin
-  if (isProtectedRoute && !token) {
-    // Check localStorage via client-side (this will be handled by AuthContext)
-    // Middleware can't access localStorage, so we redirect
-    const signInUrl = new URL('/signin', request.url);
-    return NextResponse.redirect(signInUrl);
+  // Allow public routes
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
   }
 
-  // If on signin/signup page and has token, redirect to tasks
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/signin') ||
-                      request.nextUrl.pathname.startsWith('/signup');
+  // Allow Next.js internals
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/favicon")
+  ) {
+    return NextResponse.next();
+  }
 
-  if (isAuthRoute && token) {
-    const tasksUrl = new URL('/tasks', request.url);
-    return NextResponse.redirect(tasksUrl);
+  // Example auth check (pseudo)
+  const isAuthenticated = false; // replace with real check
+
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL("/signin", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/tasks/:path*', '/signin', '/signup'],
+  matcher: ["/((?!_next|api|favicon.ico).*)"],
 };
