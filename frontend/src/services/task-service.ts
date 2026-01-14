@@ -20,7 +20,7 @@ export class TaskService extends BaseService {
     return this.put<Task>(`${this.basePath}/${id}`, taskData);
   }
 
-  async delete(id: string): Promise<ApiResponse<null>> {
+  async deleteById(id: string): Promise<ApiResponse<null>> {
     return this.delete<null>(`${this.basePath}/${id}`);
   }
 

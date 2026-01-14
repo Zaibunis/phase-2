@@ -5,10 +5,11 @@
 
 import { betterAuth } from "better-auth";
 import { createAuthClient } from "better-auth/client";
+import type { AuthContextType } from "../types/auth";
 
 // Initialize Better Auth client for frontend - No database configuration needed
 export const auth = betterAuth({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
   secret: process.env.BETTER_AUTH_SECRET || "your-super-secret-jwt-key-change-in-production",
   // Frontend doesn't need database configuration - this is handled by the backend
   // Email and password authentication
@@ -35,14 +36,14 @@ export const auth = betterAuth({
 
 // Create authentication client
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
   plugins: [
     // Add any additional plugins here
   ]
 });
 
 // Export BetterAuth hooks
-export const { useSession, useSignIn, useSignUp, useSignOut } = authClient;
+export const { useSession} = authClient;
 
 // Helper function to get the access token
 export const getAccessToken = async (): Promise<string | null> => {

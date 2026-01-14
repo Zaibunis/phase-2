@@ -78,7 +78,7 @@ export class TaskCrudService {
    */
   async deleteTask(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await taskService.delete(id);
+      const response = await taskService.deleteById(id);
 
       if (response.success) {
         return { success: true };
