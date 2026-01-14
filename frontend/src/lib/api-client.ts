@@ -120,7 +120,7 @@ export interface ApiConfig {
 
 // Default configuration
 const defaultConfig: ApiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   timeout: 10000, // 10 seconds
   maxRetries: 3,
   retryDelay: 1000, // 1 second
