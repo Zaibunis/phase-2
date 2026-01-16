@@ -93,25 +93,47 @@ const TasksPage = () => {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="text-center">
-          <p className="text-lg">Please sign in to view your tasks</p>
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-2xl">✓</span>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+            TaskFlow Pro
+          </h1>
+          <p className="text-xl text-gray-300">Please sign in to view your tasks</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <TaskList
-        tasks={tasks}
-        loading={loading}
-        error={error ?? undefined}
-        onAddTask={addTask}
-        onUpdateTask={updateTask}
-        onDeleteTask={deleteTask}
-        onToggleTask={toggleTask}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold">✓</span>
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              My Tasks
+            </h1>
+          </div>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Organize your workflow and boost productivity with TaskFlow Pro. Create, manage, and accomplish your goals efficiently.
+          </p>
+        </div>
+
+        <TaskList
+          tasks={tasks}
+          loading={loading}
+          error={error ?? undefined}
+          onAddTask={addTask}
+          onUpdateTask={updateTask}
+          onDeleteTask={deleteTask}
+          onToggleTask={toggleTask}
+        />
+      </div>
     </div>
   );
 };
