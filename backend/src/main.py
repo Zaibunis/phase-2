@@ -42,7 +42,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://phase-2-git-002-frontend-app-faria-mustaqeems-projects.vercel.app"
+        "https://phase-2-liart.vercel.app/"
     ],
     allow_credentials=True,
     allow_methods=["*"],
