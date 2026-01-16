@@ -53,11 +53,20 @@ export const { useSession} = authClient;
 // Helper function to get the access token
 export const getAccessToken = async (): Promise<string | null> => {
   try {
+    // First try to get from BetterAuth
     const session = await auth.api.getSession();
-    return session?.session?.token || null;
+    if (session?.session?.token) {
+      return session.session.token;
+    }
+
+    // Fallback to localStorage for JWT tokens
+    const token = localStorage.getItem('access_token');
+    return token;
   } catch (error) {
     console.error("Error getting access token:", error);
-    return null;
+    // Fallback to localStorage in case of error
+    const token = localStorage.getItem('access_token');
+    return token;
   }
 };
 

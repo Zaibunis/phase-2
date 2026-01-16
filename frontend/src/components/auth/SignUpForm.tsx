@@ -8,6 +8,7 @@ import { validateEmail, validatePassword } from '../../lib/utils/validation';
 import { Input } from '@/src/styling/ui/input';
 import { Button } from '@/src/styling/ui/button';
 import { SignInFormState, SignUpFormState } from '../../types/auth';
+import { useRouter } from 'next/navigation';
 
 interface SignUpFormProps {
   onSuccess?: () => void;
@@ -15,6 +16,7 @@ interface SignUpFormProps {
 
 export function SignUpForm({ onSuccess }: SignUpFormProps) {
   const { signUp } = useAuth();
+  const router = useRouter();
   const [formState, setFormState] = useState<SignUpFormState>({
     email: '',
     password: '',
@@ -119,6 +121,9 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
     try {
       setFormState((prev) => ({ ...prev, isSubmitting: true, errors: {} }));
       await signUp(formState.email, formState.password);
+
+      // Redirect to tasks page after successful authentication
+      router.push('/tasks');
       onSuccess?.();
     } catch (error: any) {
       setFormState((prev) => ({

@@ -55,7 +55,24 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
           error: null,
           isAuthenticated: true
         });
+      } else {
+        // Token exists but is invalid, clear it
+        localStorage.removeItem('access_token');
+        setAuthState({
+          user: null,
+          loading: false,
+          error: null,
+          isAuthenticated: false
+        });
       }
+    } else {
+      // No token found
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+        isAuthenticated: false
+      });
     }
   }, []);
 
@@ -80,7 +97,27 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             error: null,
             isAuthenticated: true
           });
+        } else {
+          // Invalid token received
+          setAuthState(prev => ({
+            ...prev,
+            loading: false,
+            error: 'Invalid token received from server',
+            isAuthenticated: false,
+            user: null
+          }));
+          throw new Error('Invalid token received from server');
         }
+      } else {
+        // No token received
+        setAuthState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'No token received from server',
+          isAuthenticated: false,
+          user: null
+        }));
+        throw new Error('No token received from server');
       }
     } catch (error: any) {
       setAuthState(prev => ({
@@ -115,7 +152,27 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             error: null,
             isAuthenticated: true
           });
+        } else {
+          // Invalid token received
+          setAuthState(prev => ({
+            ...prev,
+            loading: false,
+            error: 'Invalid token received from server',
+            isAuthenticated: false,
+            user: null
+          }));
+          throw new Error('Invalid token received from server');
         }
+      } else {
+        // No token received
+        setAuthState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'No token received from server',
+          isAuthenticated: false,
+          user: null
+        }));
+        throw new Error('No token received from server');
       }
     } catch (error: any) {
       setAuthState(prev => ({
@@ -132,6 +189,8 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await authHook.signOut();
+      // Clear all auth-related data
+      localStorage.removeItem('access_token');
       setAuthState({
         user: null,
         loading: false,
@@ -142,6 +201,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Sign out error:', error);
       // Even if sign out fails, clear local state
+      localStorage.removeItem('access_token');
       setAuthState({
         user: null,
         loading: false,

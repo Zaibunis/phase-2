@@ -42,7 +42,7 @@ export function useBetterAuth(): AuthContextType {
 
       if (response.data.access_token) {
         localStorage.setItem('access_token', response.data.access_token);
-        router.push('/tasks');
+        // Don't redirect here - let the form component handle the redirect after context updates
       } else {
         throw new Error('Sign in failed - no token received');
       }
@@ -50,7 +50,7 @@ export function useBetterAuth(): AuthContextType {
       const errorMessage = error.response?.data?.error?.message || error.message || 'Sign in failed';
       throw new Error(errorMessage);
     }
-  }, [router]);
+  }, []);
 
   const signUpHandler = useCallback(async (email: string, password: string) => {
     try {
@@ -63,7 +63,7 @@ export function useBetterAuth(): AuthContextType {
       if (response.data.access_token) {
         // Store the token in localStorage for use with API calls
         localStorage.setItem('access_token', response.data.access_token);
-        router.push('/tasks');
+        // Don't redirect here - let the form component handle the redirect after context updates
       } else {
         throw new Error('Sign up failed - no token received');
       }
@@ -71,7 +71,7 @@ export function useBetterAuth(): AuthContextType {
       const errorMessage = error.response?.data?.error?.message || error.message || 'Sign up failed';
       throw new Error(errorMessage);
     }
-  }, [router]);
+  }, []);
 
   const signOutHandler = useCallback(async () => {
     try {
