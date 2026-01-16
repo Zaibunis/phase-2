@@ -37,9 +37,14 @@ export const auth = betterAuth({
 // Create authentication client
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
-  plugins: [
-    // Add any additional plugins here
-  ]
+  plugins: [],
+  // ⚡ Important: Include credentials for cookies
+  fetchOptions: {
+    credentials: "include", // ensures cookies (session) are sent
+    headers: {
+      "Content-Type": "application/json",
+    },
+  },
 });
 
 // Export BetterAuth hooks
