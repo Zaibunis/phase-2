@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosHeaders, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken } from '../lib/auth';
 
 class ApiClient {
@@ -7,21 +7,29 @@ class ApiClient {
   constructor(baseURL: string) {
     this.client = axios.create({
       baseURL,
-      timeout: 10000, // 10 seconds timeout
+      timeout: 15000, // 15 seconds timeout for deployed environment
       headers: {
         'Content-Type': 'application/json',
       },
+      // Enable cross-site requests to handle deployed backend
+      withCredentials: true,
     });
 
     // Request interceptor to add JWT token
-    this.client.interceptors.request.use(
-      async (config: InternalAxiosRequestConfig) => {
-        const token = await getAccessToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
+this.client.interceptors.request.use(
+  async (config: InternalAxiosRequestConfig) => {
+    const token = await getAccessToken();
+
+    if (token) {
+      if (!config.headers) {
+        config.headers = AxiosHeaders.from({});
+      }
+
+      config.headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    return config;
+  },
       (error) => {
         return Promise.reject(error);
       }

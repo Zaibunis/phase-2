@@ -3,36 +3,7 @@
  * Handles user authentication, JWT token management, and API integration.
  */
 
-import { betterAuth } from "better-auth";
 import { createAuthClient } from "better-auth/client";
-import type { AuthContextType } from "../types/auth";
-
-// Initialize Better Auth client for frontend - No database configuration needed
-export const auth = betterAuth({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
-  secret: process.env.BETTER_AUTH_SECRET || "your-super-secret-jwt-key-change-in-production",
-  // Frontend doesn't need database configuration - this is handled by the backend
-  // Email and password authentication
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false, // Set to true in production
-  },
-  // Social providers can be added here
-  socialProviders: {},
-  // Session configuration
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // Update session every 24 hours if active
-  },
-  // User configuration
-  user: {
-    fields: {
-      // Map any additional fields if needed
-    },
-  },
-  // Hooks for custom logic
-  hooks: {}
-});
 
 // Create authentication client
 export const authClient = createAuthClient({
@@ -48,18 +19,12 @@ export const authClient = createAuthClient({
 });
 
 // Export BetterAuth hooks
-export const { useSession} = authClient;
+export const { useSession } = authClient;
 
 // Helper function to get the access token
 export const getAccessToken = async (): Promise<string | null> => {
   try {
-    // First try to get from BetterAuth
-    const session = await auth.api.getSession();
-    if (session?.session?.token) {
-      return session.session.token;
-    }
-
-    // Fallback to localStorage for JWT tokens
+    // For JWT tokens, we primarily rely on localStorage
     const token = localStorage.getItem('access_token');
     return token;
   } catch (error) {
@@ -73,8 +38,8 @@ export const getAccessToken = async (): Promise<string | null> => {
 // Helper function to get the refresh token
 export const getRefreshToken = async (): Promise<string | null> => {
   try {
-    const session = await auth.api.getSession();
-    return session?.session?.token || null;
+    const token = localStorage.getItem('refresh_token');
+    return token || null;
   } catch (error) {
     console.error("Error getting refresh token:", error);
     return null;
@@ -84,8 +49,8 @@ export const getRefreshToken = async (): Promise<string | null> => {
 // Helper function to check if user is authenticated
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    const session = await auth.api.getSession();
-    return !!session?.session;
+    const token = localStorage.getItem('access_token');
+    return !!token;
   } catch (error) {
     console.error("Error checking authentication status:", error);
     return false;
@@ -95,9 +60,14 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Helper function to sign out
 export const signOut = async (): Promise<void> => {
   try {
-    await auth.api.signOut();
+    // Use the authClient to sign out if available, otherwise just clear local storage
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   } catch (error) {
     console.error("Error signing out:", error);
+    // Still try to clear local storage even if there's an error
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     throw error;
   }
 };
