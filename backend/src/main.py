@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -18,13 +19,16 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting Task API Backend...")
-    init_db()
-    logger.info("Application startup complete")
+    # Run DB init fast, non-blocking
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.warning(f"Database init skipped or failed: {e}")
     yield
     logger.info("Application shutdown complete")
 
-
+# Create FastAPI app
 app = FastAPI(
     title="Task API",
     description="RESTful API for task management with user isolation",
@@ -34,10 +38,12 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS middleware
+# CORS for Vercel frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://phase-2-git-002-frontend-app-faria-mustaqeems-projects.vercel.app/"],
+    allow_origins=[
+        "https://phase-2-git-002-frontend-app-faria-mustaqeems-projects.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,10 +56,11 @@ app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
 # Health check
 @app.get("/health", tags=["health"])
+@app.get("/", tags=["health"])  # HF ping root for readiness
 async def health_check():
     return {"status": "healthy"}
 
-# Wrap 401/403 into {"error": ...} for test compatibility
+# Exception handlers
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -61,11 +68,13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code in (401, 403):
         detail = exc.detail
-        # If detail is dict, use its fields; otherwise just message
         if isinstance(detail, dict):
             return JSONResponse(status_code=exc.status_code, content={"error": detail})
         else:
-            return JSONResponse(status_code=exc.status_code, content={"error": {"code": str(exc.status_code), "message": str(detail)}})
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"error": {"code": str(exc.status_code), "message": str(detail)}}
+            )
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 @app.exception_handler(Exception)
@@ -75,3 +84,9 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"error": {"code": "INTERNAL_ERROR", "message": "An unexpected error occurred", "details": None}}
     )
+
+# === HUGGING FACE ENTRYPOINT ===
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 7860))  # HF requires $PORT
+    uvicorn.run(app, host="0.0.0.0", port=port)
