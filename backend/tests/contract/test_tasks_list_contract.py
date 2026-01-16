@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from httpx import AsyncClient
 
-from api.schemas.tasks import TaskListResponse
+from src.api.schemas.tasks import TaskListResponse
 
 
 @pytest.mark.asyncio

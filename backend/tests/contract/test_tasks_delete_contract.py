@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from api.schemas.tasks import TaskResponse
+from src.api.schemas.tasks import TaskResponse
 
 
 def test_delete_task_contract():

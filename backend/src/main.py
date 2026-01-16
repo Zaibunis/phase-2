@@ -1,14 +1,13 @@
-"""FastAPI application entry point."""
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
 
-from .config import settings
-from .models.database import init_db
-from .api.routes import router as api_router
-from .api.routes.auth import router as auth_router
+from src.config import settings
+from src.models.database import init_db
+from src.api.routes.tasks import router as tasks_router
+from src.api.routes.auth import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -17,22 +16,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan events."""
-    # Startup
     logger.info("Starting Task API Backend...")
     init_db()
     logger.info("Application startup complete")
-
     yield
-
-    # Shutdown
     logger.info("Application shutdown complete")
 
 
-# Create FastAPI application
 app = FastAPI(
     title="Task API",
     description="RESTful API for task management with user isolation",
@@ -42,57 +34,44 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS for BetterAuth compatibility
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://localhost:8000",  # Allow backend origin for cookie handling
-    ],
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    # Expose authorization headers and set-cookie for BetterAuth
-    expose_headers=["Access-Control-Allow-Origin", "Set-Cookie", "Authorization"]
+    expose_headers=["Set-Cookie", "Authorization"]
 )
 
-# Include API routes
+# Include routers
+app.include_router(tasks_router, prefix="/v1/tasks", tags=["tasks"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-app.include_router(api_router, prefix="/users/{user_id}/tasks", tags=["tasks"])
 
-
-# Health check endpoint
+# Health check
 @app.get("/health", tags=["health"])
 async def health_check():
-    """Health check endpoint."""
     return {"status": "healthy"}
 
+# Wrap 401/403 into {"error": ...} for test compatibility
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-# Global exception handler
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code in (401, 403):
+        detail = exc.detail
+        # If detail is dict, use its fields; otherwise just message
+        if isinstance(detail, dict):
+            return JSONResponse(status_code=exc.status_code, content={"error": detail})
+        else:
+            return JSONResponse(status_code=exc.status_code, content={"error": {"code": str(exc.status_code), "message": str(detail)}})
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Handle unexpected exceptions."""
     logger.error(f"Unexpected error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": {
-                "code": "INTERNAL_ERROR",
-                "message": "An unexpected error occurred",
-                "details": None
-            }
-        }
-    )
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(
-        "src.main:app",
-        host=settings.api_host,
-        port=settings.api_port,
-        reload=settings.debug
+        content={"error": {"code": "INTERNAL_ERROR", "message": "An unexpected error occurred", "details": None}}
     )

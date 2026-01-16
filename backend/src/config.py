@@ -1,55 +1,38 @@
-"""Configuration management using Pydantic BaseSettings."""
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 from typing import Optional
 
-
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
-
-    # Database
     database_url: str
+    better_auth_secret: Optional[str] = None
 
-    # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 
-    # JWT Authentication
     jwt_secret: str
     jwt_algorithm: str = "HS256"
-    jwt_expiration_minutes: int = 15  # Short-lived access tokens
-    jwt_refresh_expiration_hours: int = 168  # Longer refresh tokens
+    jwt_expiration_minutes: int = 15
+    jwt_refresh_expiration_hours: int = 168
     bcrypt_rounds: int = 12
 
-    # Security
     access_token_cookie_name: str = "access_token"
     refresh_token_cookie_name: str = "refresh_token"
     csrf_token_header_name: str = "x-csrf-token"
     csrf_secret: str = ""
-    better_auth_secret: str = ""
 
-    # Rate Limiting
     rate_limit_requests: int = 100
-    rate_limit_window: int = 3600  # in seconds
+    rate_limit_window: int = 3600
 
-    # Debug
     debug: bool = False
-
-    # Logging
     log_level: str = "info"
 
-    model_config = {
-        "env_file": ".env",
-        "env_file_encoding": "utf-8",
-        "case_sensitive": False
-    }
-
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = False
 
 @lru_cache()
 def get_settings() -> Settings:
-    """Get cached settings instance."""
     return Settings()
 
-
-# Global settings instance
 settings = get_settings()

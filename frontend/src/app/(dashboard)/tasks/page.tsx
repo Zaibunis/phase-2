@@ -6,7 +6,7 @@ import { Task, CreateTaskData, UpdateTaskData } from '../../../lib/types';
 import { TaskList } from '../../../components/tasks/task-list';
 
 const TasksPage = () => {
-  const { user,  } = useAuth();
+  const { user} = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

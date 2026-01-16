@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from api.schemas.tasks import TaskUpdateRequest, TaskResponse
+from src.api.schemas.tasks import TaskUpdateRequest, TaskResponse
 
 
 def test_update_task_contract():

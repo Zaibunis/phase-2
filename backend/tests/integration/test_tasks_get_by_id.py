@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from main import app
-from db.session import reset_engine_cache_for_tests
+from src.main import app
+from src.db.session import reset_engine_cache_for_tests
 
 
 def test_get_by_id_happy_path():
